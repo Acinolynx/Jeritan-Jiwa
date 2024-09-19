@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scream Challenge Game</title>
+    <style>
+        body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: Arial, sans-serif;
+    background-color: black;
+    color: white;
+    background-image: url('/Asset/BG.jpg');
+}
+
+#gameContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 80%;  /* Control the width of the entire centered layout */
+}
+
+#description {
+    width: 40%;
+    padding: 20px;
+    text-align: left;
+}
+
+#gameArea {
+    width: 60%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+#canvasContainer {
+    position: relative;
+}
+
+#gameCanvas {
+    border: 2px solid black;
+    display: block;
+}
+
+#countdownScreen, #gameOverScreen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    font-size: 48px;
+}
+
+#gameOverMessage {
+    font-size: 36px;
+}
+
+@media screen and (max-width: 768px) {
+    #gameContainer {
+        flex-direction: column;
+        width: 100%;
+        text-align: center;
+    }
+
+    #description, #gameArea {
+        width: 100%;
+    }
+}
+    </style>
+</head>
+<body>
+
+<div id="gameContainer">
+    <!-- Description Section -->
+    <div id="description">
+        <h1>Jeritan Jiwa!!</h1>
+        <p>Teriak sekencang kencangnya untuk memenangkan gamenya! Teriak selama 60 detik untuk melepaskan beban kehidupanmu!</p>
+        
+        <h2>Cara Bermain</h2>
+        <ul>
+            <li>Teriak sekencang kencangnya untuk menggerakan karakter.</li>
+            <li>.</li>
+            <li>You win if the box reaches the end of the canvas before the timer runs out.</li>
+            <li>If the timer runs out and the box hasn't reached the edge, you lose.</li>
+        </ul>
+    </div>
+
+    <!-- Game Area -->
+    <div id="gameArea">
+        <div id="canvasContainer">
+            <canvas id="gameCanvas" width="800" height="400"></canvas>
+            <div id="countdownScreen">
+                <span id="countdownTimer">3</span>
+            </div>
+            <div id="gameOverScreen">
+                <span id="gameOverMessage"></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="game.js"></script>
+
+</body>
+</html>

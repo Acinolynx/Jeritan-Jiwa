@@ -4,95 +4,188 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scream Challenge Game</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Road+Rage&display=swap" rel="stylesheet">
+
     <style>
         body, html {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-family: Arial, sans-serif;
-    background-color: black;
-    color: white;
-    background-image: url('/Asset/BG.jpg');
-}
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            background-color: #000;
+            color: white;
+            overflow: hidden;
+        }
 
-#gameContainer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 80%;  /* Control the width of the entire centered layout */
-}
+        /* Background */
+        #backgroundContainer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('./Asset/BG.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            filter: blur(5px) opacity(0.7);
+            z-index: 1;
+        }
 
-#description {
-    width: 40%;
-    padding: 20px;
-    text-align: left;
-}
+        /* Wrapper untuk game dan deskripsi */
+        #gameContainer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 80%;
+            z-index: 1;
+        }
 
-#gameArea {
-    width: 60%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-}
+        /* Deskripsi game */
+        #description {
+            width: 40%;
+            padding: 20px;
+            text-align: left;
+            margin-bottom: 60px;
+        }
 
-#canvasContainer {
-    position: relative;
-}
+        /* Area permainan */
+        #gameArea {
+            width: 60%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            border: 5px solid transparent;
+            border-image: linear-gradient(45deg, #FF26AE, #00D8F8) 1;
+        }
 
-#gameCanvas {
-    border: 2px solid black;
-    display: block;
-}
+        /* Kontainer kanvas */
+        #canvasContainer {
+            position: relative;
+            background-color: transparent;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+        }
+        /* Kanvas untuk game */
+        #gameCanvas {
+            display: block;
+            background-color: #000;
+            z-index: 2;
+        }
 
-#countdownScreen, #gameOverScreen {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.8);
-    color: white;
-    display: none;
-    justify-content: center;
-    align-items: center;
-    font-size: 48px;
-}
+        /* Overlay sebelum game dimulai */
+        #startOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            z-index: 1000;
+        }
 
-#gameOverMessage {
-    font-size: 36px;
-}
+        /* Layar countdown dan game over */
+        #countdownScreen, #gameOverScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            font-size: 48px;
+            z-index: 1000;
+        }
 
-@media screen and (max-width: 768px) {
-    #gameContainer {
-        flex-direction: column;
-        width: 100%;
-        text-align: center;
-    }
+        /* Pesan game over */
+        #gameOverMessage {
+            font-family: "Road Rage", sans-serif;
+            font-weight: 400;
+            font-style: normal;
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
 
-    #description, #gameArea {
-        width: 100%;
-    }
-}
+        /* Tombol mulai dan mulai ulang game */
+        #startButton, #restartButton {
+            font-family: "Road Rage", sans-serif;
+            font-weight: 400;
+            font-style: normal;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 10px 20px;
+            font-size: 48px;
+            color: white;
+            background: linear-gradient(45deg, #FF26AE, #00D8F8);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 1001;
+            transition: background 0.3s ease;
+        }
+
+        /* Efek hover untuk tombol */
+        #startButton:hover, #restartButton:hover {
+            background: linear-gradient(45deg, #00D8F8, #FF26AE);
+        }
+
+        #restartButton {
+            margin-top: 60px;
+        }
+
+        h1{
+            font-family: "Road Rage", sans-serif;
+            font-weight: 400;
+            font-style: normal;
+            font-size: 72px;
+            margin-bottom: -20px;
+        }
+
+        p{
+            font-size: 18px;
+        }
+
+        li{
+            font-size: 18px;
+        }
     </style>
 </head>
 <body>
 
+<!-- Background Container -->
+<div id="backgroundContainer"></div>
+
+<!-- Game dan Deskripsi -->
 <div id="gameContainer">
-    <!-- Description Section -->
+    <!-- Deskripsi Game -->
     <div id="description">
         <h1>Jeritan Jiwa!!</h1>
-        <p>Teriak sekencang kencangnya untuk memenangkan gamenya! Teriak selama 60 detik untuk melepaskan beban kehidupanmu!</p>
+        <p>Teriak sekencang-kencangnya untuk memenangkan gamenya! Teriak selama 60 detik tanpa henti untuk mengangkat beban hidupmu!</p>
         
-        <h2>Cara Bermain</h2>
+        <h1>Cara Bermain</h1>
         <ul>
-            <li>Teriak sekencang kencangnya untuk menggerakan karakter.</li>
-            <li>.</li>
-            <li>You win if the box reaches the end of the canvas before the timer runs out.</li>
-            <li>If the timer runs out and the box hasn't reached the edge, you lose.</li>
+            <li>Teriak sekencang-kencangnya untuk menggerakan karakter.</li>
+            <li>Terus Teriak tanpa henti, jika berhenti karakter tidak akan kuat menahan beban hidupmu.</li>
+            <li>Kamu menang jika karakter bisa sampai puncak.</li>
+            <li>Jika waktu habis maka kamu kalah.</li>
         </ul>
     </div>
 
@@ -100,11 +193,15 @@
     <div id="gameArea">
         <div id="canvasContainer">
             <canvas id="gameCanvas" width="800" height="400"></canvas>
+            <div id="startOverlay">
+                <button id="startButton">Mulai Game</button>
+            </div>
             <div id="countdownScreen">
-                <span id="countdownTimer">3</span>
+                <span id="countdownTimer"></span>
             </div>
             <div id="gameOverScreen">
-                <span id="gameOverMessage"></span>
+                <div id="gameOverMessage"></div>
+                <button id="restartButton">Mulai Ulang</button>
             </div>
         </div>
     </div>

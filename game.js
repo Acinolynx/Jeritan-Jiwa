@@ -1,43 +1,58 @@
 // Mendapatkan elemen kanvas dan konteksnya
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
-const scoreElement = document.createElement('div');  // No explicit score display for simplicity
 const countdownScreen = document.getElementById('countdownScreen');
 const countdownTimer = document.getElementById('countdownTimer');
 const gameOverScreen = document.getElementById('gameOverScreen');
 const gameOverMessage = document.getElementById('gameOverMessage');
+const startOverlay = document.getElementById('startOverlay');
+const startButton = document.getElementById('startButton');
+const restartButton = document.getElementById('restartButton');
 
 // Deklarasi gambar
 const characterImage = new Image();
-const boxImage = new Image();
 const backgroundImage = new Image();
 
 // Memuat gambar
-characterImage.src = 'Asset/Character.png'; // Ganti dengan path gambar karakter Anda
-boxImage.src = 'Asset/batu.png'; // Ganti dengan path gambar kotak Anda
-backgroundImage.src = 'Asset/BG Game.png'; // Ganti dengan path gambar background canvas Anda
+characterImage.src = 'Asset/Character.png';  
+backgroundImage.src = 'Asset/BG Game.png';  
 
-let boxX = 75;
-let boxY = canvas.height / 2 - 25;
-const boxWidth = 50;
-const boxHeight = 50;
+let characterX = 1;  // Posisi awal karakter di sumbu X
+let characterY = canvas.height - 100;  // Posisi awal karakter di bagian bawah kanvas
+const characterWidth = 100;
+const characterHeight = 100;
 
-let characterX = 25;
-let characterY = canvas.height / 2 - 40;
-const characterWidth = 30;
-const characterHeight = 70;
-
-let isBoxMoving = false;
 let isGameRunning = false;
-let gameStartTime = null;
-
-let timeLeft = 10;  // Game duration
-let countdown = 3;  // Countdown before game starts
+let timeLeft = 60;  // Durasi permainan
+let countdown = 3;  // Countdown sebelum permainan dimulai
 let audioContext, analyser, microphone, dataArray;
 
-// Fungsi untuk memulai countdown saat klik kanvas
-canvas.addEventListener('click', () => {
+const inclineAngle = Math.PI / 8.5;  // Kemiringan tanjakan
+const characterSpeed = 1;  // Kecepatan gerak karakter saat ada suara
+const gravity = 2;  // Kecepatan jatuh karakter saat tidak ada suara
+const finishLineY = 10;  // Posisi akhir (atas tanjakan)
+
+// Pastikan gambar dimuat sebelum memulai
+characterImage.onload = () => {
+    draw();  // Gambar ulang kanvas ketika gambar selesai dimuat
+};
+
+backgroundImage.onload = () => {
+    draw();  // Gambar ulang kanvas ketika background selesai dimuat
+};
+
+// Fungsi untuk memulai countdown saat klik tombol mulai
+startButton.addEventListener('click', () => {
     if (!isGameRunning) {
+        startOverlay.style.display = 'none'; // Menghilangkan overlay saat game dimulai
+        startCountdown();
+    }
+});
+
+// Fungsi untuk memulai countdown saat klik tombol mulai ulang
+restartButton.addEventListener('click', () => {
+    if (!isGameRunning) {
+        resetGame(); // Mulai ulang jika game over
         startCountdown();
     }
 });
@@ -69,34 +84,32 @@ function startGame() {
 
 // Reset semua variabel
 function resetGame() {
-    characterX = 25;
-    boxX = 75;
-    isBoxMoving = false;
-    gameStartTime = null;
+    characterX = 1;  // Reset posisi karakter di X
+    characterY = canvas.height - 100;  // Reset posisi karakter di Y
+    timeLeft = 10;  // Reset timer
     isGameRunning = false;
-    gameOverScreen.style.display = 'none';
-    draw();
+    countdown = 3; // Reset countdown
+    draw();  // Gambar ulang kanvas
+    startOverlay.style.display = 'none';  // Sembunyikan overlay klik untuk memulai game
+    gameOverScreen.style.display = 'none'; // Pastikan gameOverScreen disembunyikan
 }
 
 // Akhiri game dengan hasil menang/kalah
 function endGame(result) {
     isGameRunning = false;
     gameOverScreen.style.display = 'flex';
-    gameOverMessage.textContent = result === 'win' ? 'You Win!' : 'You Lose!';
+    gameOverMessage.textContent = result === 'win' ? 'Kamu Menang! Beban hidupmu hilang!' : 'Kamu Kalah! Beban hidupmu berat banget!.';
 }
 
-// Gambar latar belakang, karakter, dan kotak
+// Gambar latar belakang dan karakter Sysiphus
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // Gambar background canvas
     ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
 
-    // Gambar karakter
+    // Gambar karakter Sysiphus mendorong batu
     ctx.drawImage(characterImage, characterX, characterY, characterWidth, characterHeight);
-
-    // Gambar kotak
-    ctx.drawImage(boxImage, boxX, boxY, boxWidth, boxHeight);
 }
 
 // Inisialisasi audio untuk mendeteksi mikrofon
@@ -132,28 +145,35 @@ function detectVolume() {
     const averageVolume = sum / dataArray.length;
 
     // Gerakkan karakter jika volume tinggi
-    if (averageVolume > 50) {
-        characterX += 5;
-        if (detectCollision()) {
-            isBoxMoving = true;
+    if (averageVolume > 10) {
+        characterX += characterSpeed * Math.cos(inclineAngle);  // Gerak maju di X
+        characterY -= characterSpeed * Math.sin(inclineAngle);  // Gerak naik di Y
+
+        // Cek jika karakter melewati garis finish
+        if (characterY <= finishLineY) {
+            endGame('win');  // Menang jika sampai di garis finish
         }
-        if (isBoxMoving) {
-            boxX += 5;
-            if (boxX + boxWidth >= canvas.width) {
-                endGame('win');
-            }
-            if (characterX + characterWidth >= canvas.width) {
-                characterX = canvas.width - characterWidth;
-            }
+    } else {
+        // Turun kembali saat tidak ada suara
+        characterX -= gravity * Math.cos(inclineAngle);
+        characterY += gravity * Math.sin(inclineAngle);
+
+        // Cek jika karakter berada di batas bawah kanvas
+        if (characterY > canvas.height - characterHeight) {
+            characterY = canvas.height - characterHeight;  // Batas bawah agar tidak keluar canvas
+        }
+        // Cek jika karakter berada di batas kiri kanvas
+        if (characterX < 0) {
+            characterX = 0;  // Batas kiri agar tidak keluar canvas
+        }
+        // Cek jika karakter berada di batas kanan kanvas
+        if (characterX + characterWidth > canvas.width) {
+            characterX = canvas.width - characterWidth;  // Batas kanan agar tidak keluar canvas
         }
     }
+    
     draw();
     requestAnimationFrame(detectVolume);
-}
-
-// Deteksi tabrakan antara karakter dan kotak
-function detectCollision() {
-    return characterX + characterWidth >= boxX && characterX <= boxX + boxWidth;
 }
 
 // Mulai timer game
@@ -166,9 +186,7 @@ function startTimer() {
         timeLeft -= 1;
         if (timeLeft <= 0) {
             clearInterval(timerInterval);
-            if (boxX + boxWidth < canvas.width) {
-                endGame('lose');
-            }
+            endGame('lose');  // Kalah jika waktu habis
         }
     }, 1000);
 }

@@ -23,12 +23,12 @@ const characterWidth = 100;
 const characterHeight = 100;
 
 let isGameRunning = false;
-let timeLeft = 1;  // Durasi permainan
+let timeLeft = 30;  // Durasi permainan
 let countdown = 3;  // Countdown sebelum permainan dimulai
 let audioContext, analyser, microphone, dataArray;
 
 const inclineAngle = Math.PI / 8.5;  // Kemiringan tanjakan
-const characterSpeed = 5;  // Kecepatan gerak karakter saat ada suara
+const characterSpeed = 1;  // Kecepatan gerak karakter saat ada suara
 const gravity = 2;  // Kecepatan jatuh karakter saat tidak ada suara
 const finishLineY = 10;  // Posisi akhir (atas tanjakan)
 
@@ -86,7 +86,7 @@ function startGame() {
 function resetGame() {
     characterX = 1;  // Reset posisi karakter di X
     characterY = canvas.height - 100;  // Reset posisi karakter di Y
-    timeLeft = 10;  // Reset timer
+    timeLeft = 30;  // Reset timer
     isGameRunning = false;
     countdown = 3; // Reset countdown
     draw();  // Gambar ulang kanvas
@@ -145,7 +145,7 @@ function detectVolume() {
     const averageVolume = sum / dataArray.length;
 
     // Gerakkan karakter jika volume tinggi
-    if (averageVolume > 10) {
+    if (averageVolume > 50) {
         characterX += characterSpeed * Math.cos(inclineAngle);  // Gerak maju di X
         characterY -= characterSpeed * Math.sin(inclineAngle);  // Gerak naik di Y
 
